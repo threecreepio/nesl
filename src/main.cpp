@@ -715,16 +715,6 @@ int main(int argc, char** argv) {
         }
     }
 
-    std::string getfilepath = argv[1];
-    getfilepath = getfilepath.substr(0, getfilepath.find_last_of("/\\") + 1);
-    if (getfilepath.length() > 0) {
-        err = chdir(getfilepath.c_str());
-        if (err != 0) {
-            fprintf(stderr, "failed to load lua file, chdir error %d.\n", err);
-            return -err;
-        }
-    }
-
     L = luaL_newstate();
     luaL_openlibs(L);
     luaL_register(L, "emu", emulib);
@@ -759,6 +749,16 @@ int main(int argc, char** argv) {
         const char* errstr = lua_tostring(L, -1);
         fprintf(stderr, "%s\n", errstr);
         return -err;
+    }
+
+    std::string getfilepath = argv[1];
+    getfilepath = getfilepath.substr(0, getfilepath.find_last_of("/\\") + 1);
+    if (getfilepath.length() > 0) {
+        err = _chdir(getfilepath.c_str());
+        if (err != 0) {
+            fprintf(stderr, "failed to load lua file, chdir error %d.\n", err);
+            return -err;
+        }
     }
 
     register_optional_mappers();
