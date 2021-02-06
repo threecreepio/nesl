@@ -16,7 +16,7 @@ extern "C" {
 
 using namespace std;
 
-char* romFileName = 0;
+char romFileName[0x2000] = { 0 };
 uint8_t* romData = 0;
 size_t romDataLength = 0;
 lua_State* L = 0;
@@ -157,12 +157,7 @@ const char* loadRomFile(const char* path) {
     if (romData) {
         free(romData);
     }
-    if (romFileName) {
-        free(romFileName);
-    }
-
-    romFileName = (char*) malloc(strlen(path));
-    strcpy(romFileName, path);
+    strcpy(&romFileName[0], path);
 
 
     streampos begin, end;
