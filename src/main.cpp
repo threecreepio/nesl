@@ -80,23 +80,30 @@ static void callhook(LUAHookId calltype)
     }
 }
 
-#define make_hook(name, id) \
-static int sethook_##name(lua_State* L) { \
-if (!lua_isnil(L, 1)) \
-luaL_checktype(L, 1, LUA_TFUNCTION); \
-lua_settop(L, 1); \
-lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[##id]); \
-lua_insert(L, 1); \
-lua_setfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[##id]); \
-return 1; \
+static int sethook_by_id(lua_State* L, int id) {
+    if (!lua_isnil(L, 1)) luaL_checktype(L, 1, LUA_TFUNCTION);
+    lua_settop(L, 1);
+    lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[id]);
+    lua_insert(L, 1);
+    lua_setfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[id]);
+    return 1;
 }
 
-make_hook(emu_registerbefore, CALL_BEFOREEMULATION)
-make_hook(emu_registerafter, CALL_AFTEREMULATION)
-make_hook(emu_registerexit, CALL_BEFOREEXIT)
-make_hook(savestate_registersave, CALL_BEFORESAVE)
-make_hook(savestate_registerload, CALL_AFTERLOAD)
-
+static int sethook_emu_registerbefore(lua_State* L) {
+    return sethook_by_id(L, CALL_BEFOREEMULATION);
+}
+static int sethook_emu_registerafter(lua_State* L) {
+    return sethook_by_id(L, CALL_AFTEREMULATION);
+}
+static int sethook_emu_registerexit(lua_State* L) {
+    return sethook_by_id(L, CALL_BEFOREEXIT);
+}
+static int sethook_savestate_registersave(lua_State* L) {
+    return sethook_by_id(L, CALL_BEFORESAVE);
+}
+static int sethook_savestate_registerload(lua_State* L) {
+    return sethook_by_id(L, CALL_AFTERLOAD);
+}
 
 void memory_registerexec_tracecb(uint32_t *trace) {
     /*
