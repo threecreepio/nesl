@@ -1,0 +1,78 @@
+cmake_minimum_required(VERSION 3.10)
+project(nesl)
+
+add_definitions(-I${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src)
+
+set(LUA_SRC
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lapi.c 
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lauxlib.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lbaselib.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lcode.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/ldblib.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/ldebug.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/ldo.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/ldump.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lfunc.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lgc.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/linit.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/liolib.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/llex.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lmathlib.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lmem.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/loadlib.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lobject.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lopcodes.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/loslib.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lparser.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lstate.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lstring.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lstrlib.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/ltable.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/ltablib.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/ltm.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lundump.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lvm.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lzio.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/print.c
+)
+
+add_executable(nesl 
+	${LUA_SRC}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/abstract_file.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/apu_state.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Blip_Buffer.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Effects_Buffer.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Mapper_Fme7.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Mapper_Mmc5.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Mapper_Namco106.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Mapper_Vrc6.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/misc_mappers.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Multi_Buffer.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Apu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Buffer.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Cart.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Core.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Cpu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/nes_data.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Effects_Buffer.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Emu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_File.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Fme7_Apu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Mapper.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/nes_mappers.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Mmc1.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Mmc3.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Namco_Apu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Oscs.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Ppu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Ppu_Impl.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Ppu_Rendering.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_State.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/nes_util.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Nes_Vrc6_Apu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Mmc24.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/fex/Data_Reader.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/fex/blargg_errors.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/fex/blargg_common.cpp
+)
