@@ -1,9 +1,14 @@
 ﻿cmake_minimum_required(VERSION 3.10)
 project(nesl)
 
-add_definitions(-I${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src)
+add_definitions(
+	-I${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src
+	-I${CMAKE_CURRENT_SOURCE_DIR}/lib/microtar/src
+	-I${CMAKE_CURRENT_SOURCE_DIR}/lib
+)
 
-set(LUA_SRC
+set(LIB_SRC
+	${CMAKE_CURRENT_SOURCE_DIR}/lib/microtar/src/microtar.c 
 	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lapi.c 
 	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lauxlib.c
 	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lbaselib.c
@@ -37,8 +42,7 @@ set(LUA_SRC
 )
 
 add_executable(nesl 
-	${LUA_SRC}
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+	${LIB_SRC}
 	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/abstract_file.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/apu_state.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/nes_emu/Blip_Buffer.cpp
@@ -75,4 +79,4 @@ add_executable(nesl
 	${CMAKE_CURRENT_SOURCE_DIR}/src/fex/Data_Reader.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/fex/blargg_errors.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/fex/blargg_common.cpp
-)
+    "src/nesl.cpp" "src/nesl/screenshots.cpp" "src/nesl/memory.cpp" "src/nesl/savestates.cpp" "src/nesl/ppu.cpp" "src/nesl/emu.cpp" "src/nesl/joypad.cpp" "src/nesl/rom.cpp")
