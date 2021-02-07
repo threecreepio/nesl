@@ -101,7 +101,7 @@ int screenshots_save2(char *path, const uint8_t *src, const uint8_t *lut) {
             const int host_y = QNES_WIDTH * y;
             for (int x = 0; x < BITMAP_WIDTH; ++x) {
                 const int destpx = BMP_DATA_OFFSET + x + (y * BITMAP_WIDTH);
-                bmptmp[destpx] = src[host_y + x + 8];
+                bmptmp[destpx] = src[host_y + x + 8] & 0b00011111;
             }
         }
         if (tar) {
@@ -148,8 +148,7 @@ int screenshots_save2(char *path, const uint8_t *src, const uint8_t *lut) {
 }
 
 // Converted from Kevin Horton's qbasic palette generator.
-static void create_ntsc_palette(void)
-{
+static void create_ntsc_palette(void) {
     static int ntsctint = 46 + 10;
     static int ntschue = 72;
 
@@ -161,10 +160,8 @@ static void create_ntsc_palette(void)
     static double br2[4] = { .29,.45,.73,.9 };
     static double br3[4] = { 0,.24,.47,.77 };
 
-    for (x = 0; x <= 3; x++)
-    {
-        for (z = 0; z < 16; z++)
-        {
+    for (x = 0; x <= 3; x++) {
+        for (z = 0; z < 16; z++) {
             s = (double)ntsctint / 128;
             luma = br2[x];
             if (z == 0) { s = 0; luma = ((double)br1[x]) / 12; }
@@ -209,6 +206,7 @@ int screenshots_afterframe(void) {
     if (err) {
         return luaL_error(L, "Failed to save screenshot");
     }
+    return 0;
 }
 
 int gui_savescreenshotas(lua_State* L) {
