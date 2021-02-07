@@ -85,6 +85,7 @@ const char* reloadRom(void) {
     const char *d = NES->load_ines(a);
     if (d) return d;
     NES->reset(true, false);
+    NES->emu.nes.frame_count -= 1;
     return 0;
 }
 
@@ -100,7 +101,7 @@ void sigint(int v) {
     screenshots_exit();
 }
 
-void terminate(void) {
+void nesl_terminate(void) {
     screenshots_exit();
 #if DEBUG
     lua_close(L);

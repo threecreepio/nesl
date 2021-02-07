@@ -213,7 +213,7 @@ public:
 	byte* pal_mem() { return emu.ppu.palette; }
 	byte* oam_mem() { return emu.ppu.spr_ram; }
 
-	void set_tracecb(void (*cb)()) { emu.set_tracecb(cb); }
+	void set_tracecb(void (*cb)(nes_addr_t)) { emu.set_tracecb(cb); }
 
 	// End of public interface
 	blargg_err_t set_sample_rate( long rate, class Nes_Buffer* );

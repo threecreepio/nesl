@@ -14,8 +14,7 @@ struct hook { uint16_t start; uint16_t end; int call; };
 std::list<struct hook> exechooks;
 std::list<struct hook> memhooks;
 
-void memory_registerexec_trace() {
-    uint32_t addr = NES->emu.r.pc - 1;
+void memory_registerexec_trace(nes_addr_t addr) {
     bool matching = false;
     for (auto const& i : exechooks) {
         if (matching) {
@@ -60,9 +59,15 @@ static int memory_registerexec(lua_State* L) {
     // registerexec takes: address, length, callback
     luaL_checktype(L, 1, LUA_TNUMBER);
 
+    int size = 1;
+    int fn = 2;
     uint16_t start = lua_tonumber(L, 1);
-    int size = lua_tonumber(L, 2);
-    if (size == 0) return 0;
+    if (lua_isnumber(L, 2)) {
+        fn = 3;
+        int size = lua_tonumber(L, 2);
+        if (size == 0) return 0;
+    }
+
     uint16_t end = (start + size) - 1;
     if (end < start) {
         uint16_t x = start;
@@ -70,7 +75,7 @@ static int memory_registerexec(lua_State* L) {
         end = x;
     }
 
-    if (lua_isnil(L, 3)) {
+    if (lua_isnil(L, fn)) {
         exechooks.remove_if([L, start, end](const struct hook& i) {
             bool overlap = i.start <= end && i.end >= start;
             if (overlap) {
@@ -97,9 +102,14 @@ static int memory_registerwrite(lua_State* L) {
     // registerexec takes: address, length, callback
     luaL_checktype(L, 1, LUA_TNUMBER);
 
+    int size = 1;
+    int fn = 2;
     uint16_t start = lua_tonumber(L, 1);
-    int size = lua_tonumber(L, 2);
-    if (size == 0) return 0;
+    if (lua_isnumber(L, 2)) {
+        fn = 3;
+        int size = lua_tonumber(L, 2);
+        if (size == 0) return 0;
+    }
     uint16_t end = (start + size) - 1;
     if (end < start) {
         uint16_t x = start;
@@ -107,7 +117,7 @@ static int memory_registerwrite(lua_State* L) {
         end = x;
     }
 
-    if (lua_isnil(L, 3)) {
+    if (lua_isnil(L, fn)) {
         memhooks.remove_if([L, start, end](const struct hook& i) {
             bool overlap = i.start <= end && i.end >= start;
             if (overlap) {
@@ -146,27 +156,27 @@ int memory_readwordsigned(lua_State* L) {
 
 int memory_getregister(lua_State* L) {
     const char* str = luaL_checkstring(L, 1);
-    if (str == "a") {
+    if (strcmp(str, "a") == 0) {
         lua_pushinteger(L, NES->emu.r.a);
         return 1;
     }
-    if (str == "x") {
+    if (strcmp(str, "x") == 0) {
         lua_pushinteger(L, NES->emu.r.x);
         return 1;
     }
-    if (str == "y") {
+    if (strcmp(str, "y") == 0) {
         lua_pushinteger(L, NES->emu.r.y);
         return 1;
     }
-    if (str == "pc") {
+    if (strcmp(str, "pc") == 0) {
         lua_pushinteger(L, (uint16_t)NES->emu.r.pc);
         return 1;
     }
-    if (str == "s") {
+    if (strcmp(str, "s") == 0) {
         lua_pushinteger(L, NES->emu.r.sp);
         return 1;
     }
-    if (str == "p") {
+    if (strcmp(str, "p") == 0) {
         lua_pushinteger(L, NES->emu.r.status);
         return 1;
     }
@@ -176,27 +186,27 @@ int memory_getregister(lua_State* L) {
 int memory_setregister(lua_State* L) {
     const char* str = luaL_checkstring(L, 1);
     int value = luaL_checknumber(L, 1);
-    if (str == "a") {
+    if (strcmp(str, "a") == 0) {
         NES->emu.r.a = value;
         return 1;
     }
-    if (str == "x") {
+    if (strcmp(str, "x") == 0) {
         NES->emu.r.x = value;
         return 1;
     }
-    if (str == "y") {
+    if (strcmp(str, "y") == 0) {
         NES->emu.r.y = value;
         return 1;
     }
-    if (str == "pc") {
+    if (strcmp(str, "pc") == 0) {
         NES->emu.r.pc = value;
         return 1;
     }
-    if (str == "s") {
+    if (strcmp(str, "s") == 0) {
         NES->emu.r.sp = value;
         return 1;
     }
-    if (str == "p") {
+    if (strcmp(str, "p") == 0) {
         NES->emu.r.status = value;
         return 1;
     }

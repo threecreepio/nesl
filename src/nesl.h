@@ -30,7 +30,7 @@ int sethook_by_id(lua_State* L, int id);
 void callhook(LUAHookId calltype);
 int donothing(lua_State* L);
 int unimplemented(lua_State* L);
-void terminate();
+void nesl_terminate(void);
 
 extern char screenshot_pending[0x2000];
 void screenshots_exit();
