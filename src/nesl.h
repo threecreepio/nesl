@@ -32,10 +32,10 @@ int donothing(lua_State* L);
 int unimplemented(lua_State* L);
 void nesl_terminate(void);
 
-extern char screenshot_pending[0x2000];
-void screenshots_exit();
-void screenshots_init();
-void screenshots_save(std::string path);
+extern bool screenshotpending;
+void screenshots_exit(void);
+void screenshots_beforeframe(void);
+int screenshots_afterframe(void);
 int gui_savescreenshotas(lua_State* L);
 int gui_setscreenshottarball(lua_State* L);
 
