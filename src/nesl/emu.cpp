@@ -28,17 +28,10 @@ int emu_framecount(lua_State* L) {
 int emu_frameadvance(lua_State* L) {
     callhook(CALL_BEFOREEMULATION);
     if (NES->emu.nes.frame_count > 2) {
-        std::string savepath;
-        if (screenshot_pending[0]) {
-            savepath = std::string(screenshot_pending);
-            screenshot_pending[0] = 0;
-            NES->emu.ppu.host_pixels = (uint8_t*)NES->host_pixels;
-        }
+        bool screenshot = screenshotpending;
+        if (screenshot) screenshots_beforeframe();
         NES->emu.emulate_frame();
-        if (!savepath.empty()) {
-            NES->emu.ppu.host_pixels = 0;
-            screenshots_save(savepath);
-        }
+        if (screenshot) screenshots_afterframe();
     } else {
         NES->emu.nes.frame_count += 1;
     }
