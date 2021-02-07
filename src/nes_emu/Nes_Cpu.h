@@ -52,7 +52,8 @@ public:
 		result_badop    // unimplemented/illegal instruction
 	};
 	
-	result_t run( nes_time_t end_time );
+	result_t run(nes_time_t end_time);
+	result_t run_debug( nes_time_t end_time );
 	
 	nes_time_t time() const             { return clock_count; }
 	void reduce_limit( int offset );
@@ -66,7 +67,7 @@ public:
 	// One of the many opcodes that are undefined and stop CPU emulation.
 	enum { bad_opcode = 0xD2 };
 
-	void set_tracecb(void (*cb)());
+	void set_tracecb(void (*cb)(nes_addr_t));
 	void set_memtracecb(void (*cb)(nes_addr_t, int));
 	
 	uint8_t const* code_map [page_count + 1];
@@ -80,7 +81,8 @@ public:
 	void set_code_page( int, uint8_t const* );
 	void update_clock_limit();
 
-	void (*tracecb)();
+	bool debugging;
+	void (*tracecb)(nes_addr_t);
 	void (*memtracecb)(nes_addr_t, int);
 	
 	registers_t r;

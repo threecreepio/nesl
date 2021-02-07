@@ -19,7 +19,7 @@ int emu_pause(lua_State* L) {
 }
 
 int emu_framecount(lua_State* L) {
-    int frame = NES->emu.nes.frame_count - 1;
+    int frame = NES->emu.nes.frame_count;
     if (frame < 0) frame = 0;
     lua_pushinteger(L, frame);
     return 1;
@@ -27,7 +27,7 @@ int emu_framecount(lua_State* L) {
 
 int emu_frameadvance(lua_State* L) {
     callhook(CALL_BEFOREEMULATION);
-    if (NES->emu.nes.frame_count > 1) {
+    if (NES->emu.nes.frame_count > 2) {
         std::string savepath;
         if (screenshot_pending[0]) {
             savepath = std::string(screenshot_pending);
@@ -39,8 +39,7 @@ int emu_frameadvance(lua_State* L) {
             NES->emu.ppu.host_pixels = 0;
             screenshots_save(savepath);
         }
-    }
-    else {
+    } else {
         NES->emu.nes.frame_count += 1;
     }
     callhook(CALL_AFTEREMULATION);
@@ -51,11 +50,14 @@ int emu_frameadvance(lua_State* L) {
 
 int emu_poweron(lua_State* L) {
     NES->reset(true, false);
+    NES->emu.nes.frame_count -= 1;
     return 0;
 }
 
 int emu_softreset(lua_State* L) {
     NES->reset(false, false);
+    NES->emu.emulate_frame();
+    NES->emu.nes.frame_count -= 1;
     return 0;
 }
 
@@ -87,7 +89,7 @@ int emu_print(lua_State* L) {
 
 int emu_exit(lua_State* L) {
     callhook(CALL_BEFOREEXIT);
-    terminate();
+    nesl_terminate();
     return 0;
 }
 
@@ -106,15 +108,21 @@ static int emu_exec_count(lua_State* L) {
     return 1;
 }
 
+int emu_version(lua_State* L) {
+    lua_pushstring(L, "0.1");
+    return 1;
+}
+
 static const struct luaL_reg emulib[] = {
+    {"nesl", emu_version},
     {"framecount", emu_framecount},
     {"frameadvance", emu_frameadvance},
     {"poweron", emu_poweron},
     {"softreset", emu_softreset},
     {"loadrom", emu_loadrom},
     {"speedmode", donothing},
-    // {"debuggerloop", emu_debuggerloop},
-    // {"debuggerloopstep", emu_debuggerloopstep},
+    {"debuggerloop", unimplemented},
+    {"debuggerloopstep", unimplemented},
     {"paused", donothing},
     {"pause", emu_pause},
     {"unpause", donothing},

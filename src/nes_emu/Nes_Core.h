@@ -6,6 +6,8 @@
 #ifndef NES_CORE_H
 #define NES_CORE_H
 
+extern const unsigned char clock_table[256];
+
 #include "blargg_common.h"
 #include "Nes_Apu.h"
 #include "Nes_Cpu.h"
