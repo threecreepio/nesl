@@ -66,7 +66,8 @@ public:
 	// One of the many opcodes that are undefined and stop CPU emulation.
 	enum { bad_opcode = 0xD2 };
 
-	void set_tracecb(void (*cb)(unsigned int *dest));
+	void set_tracecb(void (*cb)());
+	void set_memtracecb(void (*cb)(nes_addr_t, int));
 	
 	uint8_t const* code_map [page_count + 1];
 	nes_time_t clock_limit;
@@ -79,7 +80,8 @@ public:
 	void set_code_page( int, uint8_t const* );
 	void update_clock_limit();
 
-	void (*tracecb)(unsigned int *dest);
+	void (*tracecb)();
+	void (*memtracecb)(nes_addr_t, int);
 	
 	registers_t r;
 	
