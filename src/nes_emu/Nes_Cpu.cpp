@@ -113,9 +113,14 @@ void Nes_Cpu::write( nes_addr_t addr, int value )
 	WRITE( addr, value );
 }
 
-void Nes_Cpu::set_tracecb(void (*cb)(unsigned int *data))
+void Nes_Cpu::set_tracecb(void (*cb)())
 {
 	tracecb = cb;
+}
+
+void Nes_Cpu::set_memtracecb(void (*cb)(nes_addr_t addr, int value))
+{
+	memtracecb = cb;
 }
 
 #ifndef NES_CPU_GLUE_ONLY
@@ -214,15 +219,12 @@ loop:
 
 	if (tracecb)
 	{
-		unsigned int scratch[7];
-		scratch[0] = a;
-		scratch[1] = x;
-		scratch[2] = y;
-		scratch[3] = sp;
-		scratch[4] = pc - 1;
-		scratch[5] = status;
-		scratch[6] = opcode;
-		tracecb(scratch);
+		r.pc = pc;
+		r.sp = GET_SP();
+		r.a = a;
+		r.x = x;
+		r.y = y;
+		tracecb();
 	}
 	
 	clock_count += clock_table [opcode];

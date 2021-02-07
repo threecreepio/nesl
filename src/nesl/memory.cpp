@@ -1,5 +1,5 @@
 #include "../nesl.h"
-
+#include <list>
 
 int readword(lua_State* L) {
     uint16_t addrlo = luaL_checkinteger(L, 1);
@@ -10,59 +10,123 @@ int readword(lua_State* L) {
     return (uint16_t)NES->emu.read(addrlo) | (((uint16_t)NES->emu.read(addrhi)) << 8);
 }
 
-void memory_registerexec_tracecb(uint32_t* trace) {
-    /*
-    scratch[0] = a;
-    scratch[1] = x;
-    scratch[2] = y;
-    scratch[3] = sp;
-    scratch[4] = pc - 1;
-    scratch[5] = status;
-    scratch[6] = opcode;
-    */
+struct hook { uint16_t start; uint16_t end; int call; };
+std::list<struct hook> exechooks;
+std::list<struct hook> memhooks;
 
-    printf("got exec cb for %04X!\n", trace[4]);
+void memory_registerexec_trace() {
+    uint32_t addr = NES->emu.r.pc - 1;
+    bool matching = false;
+    for (auto const& i : exechooks) {
+        if (matching) {
+            if (i.start > addr) break;
+            if (i.end < addr) continue;
+        }
+        else {
+            if (i.start > addr) continue;
+            if (i.end < addr) continue;
+            matching = true;
+        }
+        lua_rawgeti(L, LUA_REGISTRYINDEX, i.call);
+        lua_pushnumber(L, addr);
+        lua_pushnumber(L, 1);
+        lua_pushnumber(L, 0);
+        lua_call(L, 3, 0);
+    }
 }
 
-struct hook { uint16_t start; uint16_t end; uint32_t call; };
-struct hook hooks[64];
-
-int hooks_count = 0;
-uint16_t hooks_start[64] = {};
-uint16_t hooks_end[64] = {};
-int hooks_callid[64] = {};
+void memory_registerwrite_trace(nes_addr_t addr, int val) {
+    bool matching = false;
+    for (auto const& i : memhooks) {
+        if (matching) {
+            if (i.start > addr) break;
+            if (i.end < addr) continue;
+        }
+        else {
+            if (i.start > addr) continue;
+            if (i.end < addr) continue;
+            matching = true;
+        }
+        lua_rawgeti(L, LUA_REGISTRYINDEX, i.call);
+        lua_pushnumber(L, addr);
+        lua_pushnumber(L, 1);
+        lua_pushnumber(L, val);
+        lua_call(L, 3, 0);
+    }
+}
 
 
 static int memory_registerexec(lua_State* L) {
     // registerexec takes: address, length, callback
     luaL_checktype(L, 1, LUA_TNUMBER);
 
-    uint16_t addr = lua_tonumber(L, 1);
-    uint16_t size = lua_tonumber(L, 2);
-    uint16_t cb = lua_tonumber(L, 2);
-
-    for (int i = 0; i < hooks_count - 1; ++i) {
-        if (hooks[i].start < addr) continue;
-        if (hooks[i + i].start > addr) break;
-        for (int j = i + 1; j < hooks_count; ++j) {
-            hooks[j] = hooks[i];
-        }
+    uint16_t start = lua_tonumber(L, 1);
+    int size = lua_tonumber(L, 2);
+    if (size == 0) return 0;
+    uint16_t end = (start + size) - 1;
+    if (end < start) {
+        uint16_t x = start;
+        start = end;
+        end = x;
     }
 
-    // NES->emu.set_tracecb(memory_registerexec_tracecb);
+    if (lua_isnil(L, 3)) {
+        exechooks.remove_if([L, start, end](const struct hook& i) {
+            bool overlap = i.start <= end && i.end >= start;
+            if (overlap) {
+                luaL_unref(L, LUA_REGISTRYINDEX, i.call);
+            }
+            return overlap;
+        });
+    }
+    else {
+        int cb = luaL_ref(L, LUA_REGISTRYINDEX);
+        struct hook h = { start, end, cb };
+        exechooks.push_back(h);
+        exechooks.sort([](const struct hook& a, const struct hook& b) {
+            return a.start == b.start ? a.end < b.end : a.start < b.start;
+        });
+    }
 
-    /*
-    if (!lua_isnil(L, 1)) \
-        luaL_checktype(L, 1, LUA_TFUNCTION); \
-        lua_settop(L, 1); \
-        lua_getfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[##id]); \
-lua_insert(L, 1); \
-lua_setfield(L, LUA_REGISTRYINDEX, luaCallIDStrings[##id]); \
-return 1; \
-*/
-
+    NES->emu.set_tracecb(exechooks.size() ? memory_registerexec_trace : 0);
     return 0;
+}
 
+
+static int memory_registerwrite(lua_State* L) {
+    // registerexec takes: address, length, callback
+    luaL_checktype(L, 1, LUA_TNUMBER);
+
+    uint16_t start = lua_tonumber(L, 1);
+    int size = lua_tonumber(L, 2);
+    if (size == 0) return 0;
+    uint16_t end = (start + size) - 1;
+    if (end < start) {
+        uint16_t x = start;
+        start = end;
+        end = x;
+    }
+
+    if (lua_isnil(L, 3)) {
+        memhooks.remove_if([L, start, end](const struct hook& i) {
+            bool overlap = i.start <= end && i.end >= start;
+            if (overlap) {
+                luaL_unref(L, LUA_REGISTRYINDEX, i.call);
+            }
+            return overlap;
+            });
+    }
+    else {
+        int cb = luaL_ref(L, LUA_REGISTRYINDEX);
+        struct hook h = { start, end, cb };
+        memhooks.push_back(h);
+        memhooks.sort([](const struct hook& a, const struct hook& b) {
+            return a.start == b.start ? a.end < b.end : a.start < b.start;
+            });
+    }
+
+    NES->emu.set_memtracecb(memhooks.size() ? memory_registerwrite_trace : 0);
+    return 0;
 }
 
 int memory_readbyte(lua_State* L) {
@@ -184,11 +248,11 @@ const struct luaL_reg memorylib[] = {
     {"getregister", memory_getregister},
     {"setregister", memory_setregister},
 
-    //{"registerwrite", memory_registerwrite},
-    //{"registerexec", memory_registerexec},
-    //{"register", memory_registerwrite},
-    //{"registerrun", memory_registerexec},
-    //{"registerexecute", memory_registerexec},
+    {"registerwrite", memory_registerwrite},
+    {"registerexec", memory_registerexec},
+    {"register", memory_registerwrite},
+    {"registerrun", memory_registerexec},
+    {"registerexecute", memory_registerexec},
     {NULL,NULL}
 };
 

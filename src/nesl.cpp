@@ -69,7 +69,11 @@ int loadRomFile(const char* path) {
 
     romDataLength = st.st_size;
     romData = (uint8_t*) malloc(st.st_size);
+    if (romData == 0) return 1;
+
     FILE *f = fopen(path, "rb");
+    if (f == 0) return 2;
+
     fread(romData, 1, st.st_size, f);
     fclose(f);
     return 0;
