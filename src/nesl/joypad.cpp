@@ -4,6 +4,11 @@ static const char* button_mappings[] = {
     "A", "B", "select", "start", "up", "down", "left", "right"
 };
 
+static int input_get(lua_State* L) {
+    lua_newtable(L);
+    return 1;
+}
+
 static int joypad_get_fake(lua_State* L) {
     int which = luaL_checkinteger(L, 1) - 1;
     if (which < 0 || which > 1) {
@@ -69,12 +74,12 @@ static const struct luaL_reg joypadlib[] = {
 };
 
 static const struct luaL_reg inputlib[] = {
-    {"get", joypad_get_fake},
+    {"get", input_get},
     {"popup", donothing},
     {"openfilepopup", donothing},
     {"savefilepopup", donothing},
     // alternative names
-    {"read", joypad_get_fake},
+    {"read", input_get},
     {NULL,NULL}
 };
 
