@@ -13,7 +13,7 @@ extern "C" {
 #define BITMAP_SIZE (BITMAP_WIDTH * BITMAP_HEIGHT)
 
 #define QNES_WIDTH 272
-#define QNES_HEIGHT 242
+#define QNES_HEIGHT 240
 
 uint8_t colortable[0x40][0x3] = {};
 bool screenshotinitialized = 0;
@@ -58,6 +58,7 @@ void tarball_close() {
 int tarball_open(std::string path) {
     tarball_close();
     tar = (mtar_t*)malloc(sizeof(mtar_t));
+    if (!tar) return 1;
     return mtar_open(tar, path.c_str(), "wb");
 }
 
@@ -113,7 +114,7 @@ int screenshots_save2(char *path, const uint8_t *src, const uint8_t *lut) {
             fwrite(bmptmp, 1, BMP_DATA_OFFSET + BITMAP_SIZE, f);
             fclose(f);
         }
-    } else {
+    } else if (strcmp(extname, ".png") == 0) {
         size_t index = 0;
         size_t sindex = 0;
         uint8_t *pngtmp = new uint8_t[BITMAP_WIDTH * BITMAP_HEIGHT * 3];
@@ -143,6 +144,13 @@ int screenshots_save2(char *path, const uint8_t *src, const uint8_t *lut) {
             int result = stbi_write_png(path, BITMAP_WIDTH, BITMAP_HEIGHT, 3, pngtmp, BITMAP_WIDTH * 3);
         }
         delete[] pngtmp;
+    } else if (strcmp(extname, ".bin") == 0) {
+        // raw binary of the image data
+        mtar_write_file_header(tar, path, 0x20 + (QNES_HEIGHT * QNES_WIDTH));
+        mtar_write_data(tar, lut, 0x20);
+        mtar_write_data(tar, src, QNES_HEIGHT * QNES_WIDTH);
+    } else {
+        return luaL_error(L, "Unrecognized screenshot filename extension");
     }
     return 0;
 }
