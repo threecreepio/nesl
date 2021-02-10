@@ -186,6 +186,6 @@ int main(int argc, char** argv) {
     }
 
     callhook(CALL_BEFOREEXIT);
-    terminate();
+    nesl_terminate();
     return 0;
 }

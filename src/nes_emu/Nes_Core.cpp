@@ -516,8 +516,8 @@ nes_time_t Nes_Core::emulate_frame_()
 		if ( extra_instructions )
 			end_time = present + 1;
 		unsigned long cpu_error_count = cpu::error_count();
-		if (cpu::debugging)
-			last_result = cpu::run_debug( end_time - cpu_time_offset - 1 );
+		if (cpu::tracing)
+			last_result = cpu::run_trace( end_time - cpu_time_offset - 1 );
 		else
 			last_result = cpu::run(end_time - cpu_time_offset - 1);
 		cpu_adjust_time( cpu::time() );

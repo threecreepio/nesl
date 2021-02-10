@@ -11,6 +11,8 @@
 typedef long     nes_time_t; // clock cycle count
 typedef unsigned nes_addr_t; // 16-bit address
 
+void memory_tracecb(int type, nes_addr_t addr, int val);
+
 class Nes_Cpu {
 public:
 	typedef BOOST::uint8_t uint8_t;
@@ -53,7 +55,7 @@ public:
 	};
 	
 	result_t run(nes_time_t end_time);
-	result_t run_debug( nes_time_t end_time );
+	result_t run_trace( nes_time_t end_time );
 	
 	nes_time_t time() const             { return clock_count; }
 	void reduce_limit( int offset );
@@ -66,9 +68,6 @@ public:
 	
 	// One of the many opcodes that are undefined and stop CPU emulation.
 	enum { bad_opcode = 0xD2 };
-
-	void set_tracecb(void (*cb)(nes_addr_t));
-	void set_memtracecb(void (*cb)(nes_addr_t, int));
 	
 	uint8_t const* code_map [page_count + 1];
 	nes_time_t clock_limit;
@@ -81,9 +80,8 @@ public:
 	void set_code_page( int, uint8_t const* );
 	void update_clock_limit();
 
-	bool debugging;
-	void (*tracecb)(nes_addr_t);
-	void (*memtracecb)(nes_addr_t, int);
+	bool tracing;
+	void set_tracing(bool tracing);
 	
 	registers_t r;
 	

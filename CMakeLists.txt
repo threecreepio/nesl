@@ -80,4 +80,4 @@ add_executable(nesl
 	${CMAKE_CURRENT_SOURCE_DIR}/src/fex/blargg_errors.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/fex/blargg_common.cpp
 	"src/nes_emu/nes_cpu_io.cpp"
-    "src/nesl.cpp" "src/nesl/screenshots.cpp" "src/nesl/memory.cpp" "src/nesl/savestates.cpp" "src/nesl/ppu.cpp" "src/nesl/emu.cpp" "src/nesl/joypad.cpp" "src/nesl/rom.cpp" "src/nes_emu/Nes_CpuDebug.cpp")
+    "src/nesl.cpp" "src/nesl/screenshots.cpp" "src/nesl/memory.cpp" "src/nesl/savestates.cpp" "src/nesl/ppu.cpp" "src/nesl/emu.cpp" "src/nesl/joypad.cpp" "src/nesl/rom.cpp" )
