@@ -1,28 +1,14 @@
 #include "../nesl.h"
 
-int savestate_gc(lua_State* L) {
-    Nes_State* ss = (Nes_State*)lua_touserdata(L, 1);
-    delete ss;
-    return 0;
-}
-
 int savestate_object(lua_State* L) {
     Nes_State* ss = new (lua_newuserdata(L, sizeof(Nes_State))) Nes_State();
-
-    lua_newtable(L);
-    lua_pushstring(L, "Savestate");
-    lua_setfield(L, -2, "__metatable");
-    lua_pushcfunction(L, savestate_gc);
-    lua_setfield(L, -2, "__gc");
-    lua_setmetatable(L, -2);
-
     return 1;
 }
 
 int savestate_save(lua_State* L) {
     Nes_State* ss = (Nes_State*)lua_touserdata(L, 1);
     if (!ss) {
-        luaL_error(L, "Invalid savestate.save object");
+        luaL_error(L, "Invalid savestate object");
         return 0;
     }
     callhook(CALL_BEFORESAVE);
@@ -33,7 +19,7 @@ int savestate_save(lua_State* L) {
 int savestate_load(lua_State* L) {
     Nes_State* ss = (Nes_State*)lua_touserdata(L, 1);
     if (!ss) {
-        luaL_error(L, "Invalid savestate.save object");
+        luaL_error(L, "Invalid savestate object");
         return 0;
     }
     NES->load_state(*ss);
