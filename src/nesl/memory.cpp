@@ -171,9 +171,7 @@ int memory_readbytesigned(lua_State* L) {
 int memory_writebyte(lua_State* L) {
     uint16_t addr = lua_tonumber(L, 1);
     uint8_t value = lua_tonumber(L, 2);
-    if (addr < NES->low_mem_size) {
-        NES->emu.write(addr, value);
-    }
+    NES->emu.write(addr, value);
     return 0;
 }
 
