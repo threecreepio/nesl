@@ -121,7 +121,7 @@ int screenshots_save2(char *path, const uint8_t *src, const uint8_t *lut) {
         for (int y = 0; y < BITMAP_HEIGHT; ++y) {
             int host_y = QNES_WIDTH * y;
             for (int x = 0; x < BITMAP_WIDTH; ++x) {
-                char palclr = src[host_y + x + 8];
+                char palclr = src[host_y + x + 8] & 0b00011111;
                 short clr = palclr & 0b00000011 ? lut[palclr] : lut[0];
                 pngtmp[index++] = colortable[clr][0];
                 pngtmp[index++] = colortable[clr][1];
