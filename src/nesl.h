@@ -14,6 +14,7 @@ extern char romFileName[0x2000];
 extern uint8_t* romData;
 extern size_t romDataLength;
 extern lua_State* L;
+extern uint8_t joypads[2];
 
 enum LUAHookId {
     CALL_BEFOREEMULATION,

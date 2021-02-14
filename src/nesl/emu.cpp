@@ -2,6 +2,8 @@
 #include <direct.h>
 using namespace std;
 
+uint8_t joypads[2] = {0,0};
+
 static int sethook_emu_registerbefore(lua_State* L) {
     return sethook_by_id(L, CALL_BEFOREEMULATION);
 }
@@ -26,6 +28,8 @@ int emu_framecount(lua_State* L) {
 }
 
 int emu_frameadvance(lua_State* L) {
+    NES->emu.current_joypad[0] = joypads[0];
+    NES->emu.current_joypad[1] = joypads[1];
     callhook(CALL_BEFOREEMULATION);
     if (NES->emu.nes.frame_count > 2) {
         bool screenshot = screenshotpending;
@@ -36,8 +40,8 @@ int emu_frameadvance(lua_State* L) {
         NES->emu.nes.frame_count += 1;
     }
     callhook(CALL_AFTEREMULATION);
-    NES->emu.current_joypad[0] = 0;
-    NES->emu.current_joypad[1] = 0;
+    joypads[0];
+    joypads[1];
     return 0;
 }
 

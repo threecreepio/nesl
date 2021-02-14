@@ -9,13 +9,33 @@ static int input_get(lua_State* L) {
     return 1;
 }
 
-static int joypad_get_fake(lua_State* L) {
+static int joypad_getstate(lua_State* L, int state) {
     int which = luaL_checkinteger(L, 1) - 1;
     if (which < 0 || which > 1) {
         return luaL_error(L, "Invalid input port (valid range 1-4, specified %d)", which);
     }
+    int joypad = NES->emu.current_joypad[which % 2];
     lua_newtable(L);
+    for (int i = 0; i < 8; ++i) {
+        int down = (joypad & (1 << i)) ? 1 : 0;
+        if (state < 0 || state == down) {
+            lua_pushboolean(L, down == 1);
+            lua_setfield(L, 2, button_mappings[i]);
+        }
+    }
     return 1;
+}
+
+static int joypad_get(lua_State* L) {
+    return joypad_getstate(L, -1);
+}
+
+static int joypad_getdown(lua_State* L) {
+    return joypad_getstate(L, 1);
+}
+
+static int joypad_getup(lua_State* L) {
+    return joypad_getstate(L, 0);
 }
 
 static int joypad_get_raw(lua_State* L) {
@@ -35,7 +55,7 @@ static int joypad_set(lua_State* L) {
     }
 
     if (lua_isnumber(L, 2)) {
-        NES->emu.current_joypad[which % 2] = lua_tointeger(L, 2);
+        joypads[which % 2] = lua_tointeger(L, 2);
         return 0;
     }
 
@@ -53,23 +73,23 @@ static int joypad_set(lua_State* L) {
         }
     }
 
-    NES->emu.current_joypad[which % 2] = val;
+    joypads[which % 2] = val;
     return 0;
 }
 
 static const struct luaL_reg joypadlib[] = {
-    {"get", joypad_get_fake},
+    {"get", joypad_get},
     {"getraw", joypad_get_raw},
-    {"getdown", joypad_get_fake},
-    {"getup", joypad_get_fake},
-    {"getimmediate", joypad_get_fake},
+    {"getdown", joypad_getdown},
+    {"getup", joypad_getup},
+    {"getimmediate", donothing},
     {"set", joypad_set},
     // alternative names
-    {"read", joypad_get_fake},
+    {"read", joypad_get},
     {"write", joypad_set},
-    {"readdown", joypad_get_fake},
-    {"readup", joypad_get_fake},
-    {"readimmediate", joypad_get_fake},
+    {"readdown", joypad_getdown},
+    {"readup", joypad_getup},
+    {"readimmediate", donothing},
     {NULL,NULL}
 };
 
