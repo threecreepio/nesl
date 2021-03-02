@@ -228,7 +228,7 @@ void Nes_Ppu_Impl::reset( bool full_reset )
 {
 	w2000 = 0;
 	w2001 = 0;
-	r2002 = 0x80;
+	r2002 = 0x0;
 	r2007 = 0;
 	open_bus = 0;
 	decay_low = 0;

@@ -342,11 +342,9 @@ void Nes_Core::reset( bool full_reset, bool erase_battery_ram )
 		clock_ = 0;
 		
 		// Low RAM
-		memset( cpu::low_mem, 0xFF, low_ram_size );
-		cpu::low_mem [8] = 0xf7;
-		cpu::low_mem [9] = 0xef;
-		cpu::low_mem [10] = 0xdf;
-		cpu::low_mem [15] = 0xbf;
+		for (int x = 0; x < low_ram_size; ++x) {
+			cpu::low_mem[x] = (x & 4) ? 0xFF : 0x00;
+		}
 		
 		// SRAM
 		lrom_readable = 0;
