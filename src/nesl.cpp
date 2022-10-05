@@ -7,7 +7,7 @@
 using namespace std;
 
 char romFileName[0x2000] = {};
-uint8_t* romData = 0;
+uint8_t romData[1024 * 1024 * 10];
 size_t romDataLength = 0;
 lua_State* L = 0;
 Nes_Emu* NES = 0;
@@ -59,22 +59,21 @@ int sethook_by_id(lua_State* L, int id) {
 }
 
 int loadRomFile(const char* path) {
-    if (romData) {
-        free(romData);
-    }
+    romDataLength = 0;
 
     struct stat st;
     int err = stat(path, &st);
     if (err) return err;
 
+    // rom file size must be less than 10MB
+    if (st.st_size > sizeof(romData)) return 1;
     romDataLength = st.st_size;
-    romData = (uint8_t*) malloc(st.st_size);
-    if (romData == 0) return 1;
 
     FILE *f = fopen(path, "rb");
     if (f == 0) return 2;
 
     fread(romData, 1, st.st_size, f);
+    romData[st.st_size] = 0;
     fclose(f);
     return 0;
 }
@@ -113,7 +112,7 @@ void nesl_terminate(void) {
 int main(int argc, char** argv) {
     signal(SIGINT, sigint);
 
-    romData = 0;
+    romData[0] = 0;
     int err;
 
     if (argc < 2) {
@@ -170,10 +169,10 @@ int main(int argc, char** argv) {
 
     register_optional_mappers();
     NES = new Nes_Emu();
-    if (romData) {
+    if (romDataLength > 0) {
         const char* errstr = reloadRom();
         if (errstr != 0) {
-            fprintf(stderr, "Could not load rom,%s\n", errstr);
+            fprintf(stderr, "Could not load rom, %s\n", errstr);
             return -1;
         }
     }

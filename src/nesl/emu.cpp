@@ -49,8 +49,8 @@ int emu_frameadvance(lua_State* L) {
 
 int emu_poweron(lua_State* L) {
     NES->reset(true, false);
-    NES->emu.nes.frame_count = -1;
-    deadframes = 2;
+    NES->emu.nes.frame_count = 0;
+    deadframes = 1;
     return 0;
 }
 

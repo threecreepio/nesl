@@ -28,10 +28,8 @@
 }
 #else
 #define RUNMEMTRACE(addr, data) {}
-#define RUNCPUTRACE(addr, data) {}
+#define RUNCPUTRACE(addr) {}
 #endif
-
-
 
 #define NES_CPU_READ_PPU( cpu, addr, time ) \
 	STATIC_CAST(Nes_Core&,*cpu).cpu_read_ppu( addr, time )
@@ -1135,3 +1133,6 @@ end:
 
 UPDATE_CPU_STATE
 return result;
+
+#undef RUNMEMTRACE
+#undef RUNCPUTRACE

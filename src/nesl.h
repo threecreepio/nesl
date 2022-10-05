@@ -11,7 +11,7 @@ extern "C" {
 
 extern Nes_Emu* NES;
 extern char romFileName[0x2000];
-extern uint8_t* romData;
+extern uint8_t romData[1024 * 1024 * 10];
 extern size_t romDataLength;
 extern lua_State* L;
 extern uint8_t joypads[2];
