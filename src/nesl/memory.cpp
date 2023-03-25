@@ -135,7 +135,7 @@ int memory_getregister(lua_State* L) {
 
 int memory_setregister(lua_State* L) {
     const char* str = luaL_checkstring(L, 1);
-    int value = luaL_checknumber(L, 1);
+    int value = luaL_checknumber(L, 2);
     if (strcmp(str, "a") == 0) {
         NES->emu.r.a = value;
         return 1;
