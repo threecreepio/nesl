@@ -1,0 +1,16 @@
+name: "Windows build"
+on: push
+jobs:
+  win-build:
+    runs-on: windows-2022
+    steps:
+      - uses: lukka/get-cmake@latest
+      - name: Run CMake
+        uses: lukka/run-cmake@v10
+        with:
+          buildPresetAdditionalArgs: "['--config Release']"
+      - name: Upload binary
+        uses: actions/upload-artifact@v1
+        with:
+          name: nesl.exe
+          path: build/Release/nesl.exe
