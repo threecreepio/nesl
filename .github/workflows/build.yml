@@ -3,6 +3,8 @@ on: push
 jobs:
   win-build:
     runs-on: windows-2022
+    env:
+      VCPKG_DEFAULT_TRIPLET: x64-windows
     steps:
       - uses: lukka/get-cmake@latest
       - uses: actions/checkout@v3
@@ -10,6 +12,7 @@ jobs:
         uses: lukka/run-cmake@v10
         with:
           configurePreset: 'release'
+          buildPreset: 'release'
       - name: List workspace after build
         run: find .
         shell: bash
