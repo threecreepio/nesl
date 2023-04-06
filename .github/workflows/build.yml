@@ -16,6 +16,8 @@ jobs:
       - name: build
         working-directory: ${{github.workspace}}/build
         run: cmake --build . --config release
-      - name: list files
-        run: find ${{github.workspace}}/build
-        shell: bash
+      - name: upload
+        uses: actions/upload-artifact@v1
+        with:
+          name: nesl.exe
+          path: ${{github.workspace}}/build/Release/nesl.exe
