@@ -19,5 +19,8 @@ jobs:
       - name: upload
         uses: actions/upload-artifact@v1
         with:
-          name: nesl.exe
-          path: ${{github.workspace}}/build/Release/nesl.exe
+          name: nesl
+          path: |
+            ${{github.workspace}}/build/Release/nesl.exe
+            README.md
+            testing/*
