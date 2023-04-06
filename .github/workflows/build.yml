@@ -9,7 +9,10 @@ jobs:
       - name: Run CMake
         uses: lukka/run-cmake@v10
         with:
-          buildPresetAdditionalArgs: "['--config Release']"
+          configurePreset: 'release'
+      - name: List workspace after build
+        run: find .
+        shell: bash
       - name: Upload binary
         uses: actions/upload-artifact@v1
         with:
