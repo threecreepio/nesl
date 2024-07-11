@@ -21,7 +21,7 @@
 // void dprintf( const char* format, ... );
 inline void blargg_dprintf_( const char*, ... ) { }
 #undef dprintf
-#define dprintf (1) ? (void) 0 : blargg_dprintf_
+#define dprintf(...) ((void)0)
 
 // If enabled, evaluate expr and if false, make debug log entry with source file
 // and line. Meant for finding situations that should be examined further, but that

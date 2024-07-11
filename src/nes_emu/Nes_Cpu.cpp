@@ -18,8 +18,8 @@
 #include "blargg_endian.h"
 
 #include "nes_cpu_io.h"
-#include "../fex/blargg_source.h"
 #include <stdio.h>
+#include "../fex/blargg_source.h"
 
 /* Copyright (C) 2003-2006 Shay Green. This module is free software; you
 can redistribute it and/or modify it under the terms of the GNU Lesser

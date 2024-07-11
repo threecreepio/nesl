@@ -1,7 +1,11 @@
 #include "nesl.h"
 #include "./lua_bitops.cpp"
 #include <fstream>
-#include <direct.h>
+#ifdef WIN32
+    #include <direct.h>
+#else
+    #include <sys/stat.h>
+#endif
 #include <bitset>
 #include <signal.h>
 using namespace std;
@@ -160,7 +164,7 @@ int main(int argc, char** argv) {
     std::string getfilepath = argv[1];
     getfilepath = getfilepath.substr(0, getfilepath.find_last_of("/\\") + 1);
     if (getfilepath.length() > 0) {
-        err = _chdir(getfilepath.c_str());
+        err = chdir(getfilepath.c_str());
         if (err != 0) {
             fprintf(stderr, "Failed to load lua file\n");
             return -err;

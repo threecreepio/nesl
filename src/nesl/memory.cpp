@@ -1,6 +1,7 @@
 #include "../nesl.h"
 #include <list>
 #include <vector>
+#include <string.h>
 
 int readword(lua_State* L) {
     uint16_t addrlo = luaL_checkinteger(L, 1);
