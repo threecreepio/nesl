@@ -7,6 +7,10 @@ add_definitions(
 	-I${CMAKE_CURRENT_SOURCE_DIR}/lib
 )
 
+if(NOT MSVC)
+    add_compile_options(-Wno-multichar)
+endif()
+
 set(LIB_SRC
 	${CMAKE_CURRENT_SOURCE_DIR}/lib/microtar/src/microtar.c 
 	${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/lapi.c 

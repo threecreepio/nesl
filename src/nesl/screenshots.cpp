@@ -5,7 +5,15 @@ extern "C" {
 }
 #include "../nesl.h"
 #include <microtar.h>
-#include <direct.h>
+
+#ifdef WIN32
+    #include <direct.h>
+#else
+    #include <sys/stat.h>
+    #define mkdir(s) mkdir(s, 0700)
+#endif
+
+#include <unistd.h>
 #include <list>
 
 #define BITMAP_WIDTH 256

@@ -1,5 +1,9 @@
 #include "../nesl.h"
-#include <direct.h>
+#ifdef WIN32
+    #include <direct.h>
+#else
+    #include <unistd.h>
+#endif
 using namespace std;
 
 uint8_t joypads[2] = {0,0};
