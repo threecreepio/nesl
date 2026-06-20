@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA */
 #include "blargg_source.h"
 
 char const Nes_Cart::not_ines_file [] = "Not an iNES file";
+char const Nes_Cart::no_prg [] = "iNES file has no PRG banks";
 
 Nes_Cart::Nes_Cart()
 {
@@ -99,10 +100,13 @@ blargg_err_t Nes_Cart::load_ines( Auto_File_Reader in )
 	
 	if ( 0 != memcmp( h.signature, "NES\x1A", 4 ) )
 		return not_ines_file;
-	
+
 	if ( h.zero [7] ) // handle header defaced by a fucking idiot's handle
 		h.flags2 = 0;
-	
+
+	if ( h.prg_count == 0 )
+		return no_prg;
+
 	set_mapper( h.flags, h.flags2 );
 	
 	if ( h.flags & 0x04 ) // skip trainer

@@ -8,6 +8,19 @@ add_definitions(
 )
 
 if(NOT MSVC)
+    # The vendored Lua 5.1's default os.tmpname uses tmpnam(3), which glibc
+    # flags with a link-time warning. LUA_USE_MKSTEMP selects Lua's
+    # POSIX-mkstemp alternative (see lib/lua/src/luaconf.h:646). The
+    # mkstemp path is POSIX-only (uses <unistd.h> and a /tmp prefix), so
+    # this is gated to non-Windows builds. MSVC builds fall back to the
+    # upstream default (tmpnam) until someone writes a Windows-friendly
+    # mkstemp wrapper for the vendored Lua. Scope the define to loslib.c
+    # only: luaconf.h only honors it inside the loslib_c translation unit
+    # (see luaconf.h:644-660), so a global -D would just be noise.
+    set_source_files_properties(
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib/lua/src/loslib.c
+        PROPERTIES COMPILE_DEFINITIONS "LUA_USE_MKSTEMP"
+    )
     add_compile_options(-Wno-multichar)
 endif()
 
@@ -84,4 +97,4 @@ add_executable(nesl
 	${CMAKE_CURRENT_SOURCE_DIR}/src/fex/blargg_errors.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/fex/blargg_common.cpp
 	"src/nes_emu/nes_cpu_io.cpp"
-    "src/nesl.cpp" "src/nesl/screenshots.cpp" "src/nesl/memory.cpp" "src/nesl/savestates.cpp" "src/nesl/ppu.cpp" "src/nesl/emu.cpp" "src/nesl/joypad.cpp" "src/nesl/rom.cpp" )
+	"src/nesl.cpp" "src/nesl/screenshots.cpp" "src/nesl/memory.cpp" "src/nesl/savestates.cpp" "src/nesl/ppu.cpp" "src/nesl/emu.cpp" "src/nesl/joypad.cpp" "src/nesl/rom.cpp" "src/nesl/signal_handler.cpp" )

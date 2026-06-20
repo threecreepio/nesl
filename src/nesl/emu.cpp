@@ -46,8 +46,6 @@ int emu_frameadvance(lua_State* L) {
         NES->emu.nes.frame_count += 1;
     }
     callhook(CALL_AFTEREMULATION);
-    joypads[0];
-    joypads[1];
     return 0;
 }
 
@@ -82,12 +80,16 @@ int emu_loadrom(lua_State* L) {
 int emu_getdir(lua_State* L) {
     char cwd[0x2000];
     char* res = getcwd(&cwd[0], 0x2000);
+    if (res == NULL) {
+        return luaL_error(L, "getcwd failed");
+    }
     lua_pushstring(L, cwd);
     return 1;
 }
 
 int emu_print(lua_State* L) {
     const char* v = lua_tostring(L, 1);
+    if (v == NULL) return 0;
     puts(v);
     return 0;
 }

@@ -123,14 +123,17 @@ void Nes_Ppu_Impl::set_chr_bank( int addr, int size, long data )
 {
 	check( !chr_is_writable || addr == data ); // to do: is CHR RAM ever bank-switched?
 	//dprintf( "Tried to set CHR RAM bank at %04X to CHR+%04X\n", addr, data );
-	
+
+	if ( chr_size == 0 )
+		return; // no CHR data; nothing to map (defense-in-depth for bad ROMs)
+
 	if ( data + size > chr_size )
 		data %= chr_size;
-	
+
 	int count = (unsigned) size / chr_page_size;
 	assert( chr_page_size * count == size );
 	assert( addr + size <= chr_addr_size );
-	
+
 	int page = (unsigned) addr / chr_page_size;
 	while ( count-- )
 	{
@@ -146,14 +149,17 @@ void Nes_Ppu_Impl::set_chr_bank_ex( int addr, int size, long data )
 
 	check( !chr_is_writable || addr == data ); // to do: is CHR RAM ever bank-switched?
 	//dprintf( "Tried to set CHR RAM bank at %04X to CHR+%04X\n", addr, data );
-	
+
+	if ( chr_size == 0 )
+		return; // no CHR data; nothing to map (defense-in-depth for bad ROMs)
+
 	if ( data + size > chr_size )
 		data %= chr_size;
-	
+
 	int count = (unsigned) size / chr_page_size;
 	assert( chr_page_size * count == size );
 	assert( addr + size <= chr_addr_size );
-	
+
 	int page = (unsigned) addr / chr_page_size;
 	while ( count-- )
 	{

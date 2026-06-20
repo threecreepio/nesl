@@ -122,14 +122,16 @@ void Nes_Mapper::set_treble( blip_eq_t const& ) { }
 void Nes_Mapper::set_prg_bank( nes_addr_t addr, bank_size_t bs, int bank )
 {
 	require( addr >= 0x2000 ); // can't remap low-memory
-	
+
 	int bank_size = 1 << bs;
 	require( addr % bank_size == 0 ); // must be aligned
-	
+
 	int bank_count = cart_->prg_size() >> bs;
+	if ( bank_count == 0 )
+		return; // no PRG; can't map anything (defense-in-depth for bad ROMs)
 	if ( bank < 0 )
 		bank += bank_count;
-	
+
 	if ( bank >= bank_count )
 	{
 		check( !(cart_->prg_size() & (cart_->prg_size() - 1)) ); // ensure PRG size is power of 2

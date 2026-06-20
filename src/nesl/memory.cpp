@@ -51,7 +51,7 @@ static int memory_registerhook(lua_State* L, int type) {
     }
 
     if (removing) {
-        for (int i = start; i < end; ++i) {
+        for (int i = start; i <= end; ++i) {
             int addr = i % 0xFFFF;
 
             int hook_idx = regs[addr];
@@ -66,17 +66,17 @@ static int memory_registerhook(lua_State* L, int type) {
         }
     } else {
         int hook_id = luaL_ref(L, LUA_REGISTRYINDEX);
-        struct hook hook = { hook_id, end - start };
+        struct hook hook = { hook_id, end - start + 1 };
         hooks.push_back(hook);
         int hook_idx = hooks.size();
-        for (int i = start; i < end; ++i) {
+        for (int i = start; i <= end; ++i) {
             int addr = i % 0xFFFF;
             if (regs[addr] == 0) hookregistrations_total[type] += 1;
             regs[addr] = hook_idx;
         }
     }
 
-    NES->emu.set_tracing(hookregistrations_total[0] + hookregistrations_total[0] > 0);
+    NES->emu.set_tracing(hookregistrations_total[0] + hookregistrations_total[1] > 0);
     return 0;
 
 }
@@ -192,6 +192,7 @@ static int memory_readbyterange(lua_State* L) {
     }
 
     lua_pushlstring(L, buf, range_size);
+    free(buf);
     return 1;
 }
 

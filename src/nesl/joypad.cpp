@@ -5,7 +5,18 @@ static const char* button_mappings[] = {
 };
 
 static int input_get(lua_State* L) {
+    // input.get is the analog of joypad.get for player 1's currently
+    // active button state (NES->emu.current_joypad[0]). The previous
+    // implementation returned an empty table, which left the function
+    // useless. Fill it with the same key list as joypad.set's table
+    // path so callers can do `if input.get().A then ...` etc.
+    int joypad = NES->emu.current_joypad[0];
     lua_newtable(L);
+    for (int i = 0; i < 8; ++i) {
+        int down = (joypad & (1 << i)) ? 1 : 0;
+        lua_pushboolean(L, down == 1);
+        lua_setfield(L, -2, button_mappings[i]);
+    }
     return 1;
 }
 

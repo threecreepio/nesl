@@ -1,4 +1,15 @@
-/build
-/out
-/.vs
-/.vscode
+/build/
+/out/
+/.vs/
+/.vscode/
+/.idea/
+/.cache/
+*.swp
+*.swo
+*~
+.DS_Store
+tmp/
+
+# Test scratch files produced by testing/run_tests.sh
+testing/tenmb.bin
+testing/noext_*

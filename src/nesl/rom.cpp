@@ -17,14 +17,16 @@ int rom_readbytesigned(lua_State* L) {
 }
 
 static int rom_readbyterange(lua_State* L) {
-    size_t range_start = luaL_checkinteger(L, 1);
-    size_t range_size = luaL_checkinteger(L, 2);
-    if (range_size < 0)
-        return 0;
-    if (range_start < 0 || range_start >= romDataLength)
+    int range_start_signed = luaL_checkinteger(L, 1);
+    int range_size_signed = luaL_checkinteger(L, 2);
+    if (range_start_signed < 0 || range_start_signed >= (int)romDataLength)
         luaL_error(L, "invalid argument range_start");
-    if (range_size < 0 || range_start + range_size >= romDataLength)
+    if (range_size_signed < 0 ||
+        (size_t)range_start_signed + (size_t)range_size_signed > romDataLength)
         luaL_error(L, "invalid argument range_size");
+
+    size_t range_start = (size_t)range_start_signed;
+    size_t range_size = (size_t)range_size_signed;
 
     char* buf = (char*)malloc(range_size);
     if (buf == 0) {
@@ -36,6 +38,7 @@ static int rom_readbyterange(lua_State* L) {
     }
 
     lua_pushlstring(L, buf, range_size);
+    free(buf);
     return 1;
 }
 
@@ -57,5 +60,5 @@ static const struct luaL_reg romlib[] = {
 };
 
 void romlib_register(lua_State* L) {
-    luaL_register(L, "rom,", romlib);
+    luaL_register(L, "rom", romlib);
 }

@@ -23,6 +23,7 @@ static int ppu_readbyterange(lua_State* L) {
     }
 
     lua_pushlstring(L, buf, range_size);
+    free(buf);
     return 1;
 }
 

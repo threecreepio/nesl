@@ -1,0 +1,3 @@
+[submodule "testing/test_roms"]
+	path = testing/test_roms
+	url = https://github.com/christopherpow/nes-test-roms

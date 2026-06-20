@@ -12,6 +12,62 @@ nesl script.lua [rom.nes]
 
 You can skip the NES rom if your lua script loads one itself.
 
+## Building
+
+Requires CMake (>= 3.10) and a C++ compiler. Lua 5.1 and other
+dependencies are vendored under `lib/`, so no system libraries
+are needed beyond the toolchain. Ninja is the recommended
+generator and is what the CI uses; the `release` CMake preset
+(see `CMakePresets.json`) selects it and writes outputs to
+`build/Release/`.
+
+    cmake -G Ninja --preset release -S . -B build/Release
+    cmake --build build/Release
+
+The result is `build/Release/nesl` (Linux/macOS) or
+`build/Release/nesl.exe` (Windows). This is a headless binary
+suitable for running scripts from the command line; there is
+no GUI.
+
+## Testing
+
+The test suite lives in `testing/` and is bash + Lua. Each test is
+a `.lua` file that exits 0 on pass and non-zero on failure; the
+runner iterates them with a 10s timeout each.
+
+Run the full suite:
+
+    cmake --build build/Release                 # if not already built
+    bash testing/run_tests.sh
+
+If the binary is at a non-default path, set `NESL_BIN`:
+
+    NESL_BIN=/path/to/nesl bash testing/run_tests.sh
+
+The suite currently contains 7 regression tests covering edge
+cases in the Lua-facing API: nil/non-string arguments, oversized
+buffers, savestate type confusion, bad iNES headers, and similar
+inputs that previously caused segfaults. All tests should pass
+on a clean build.
+
+### Test ROMs (optional)
+
+The test suite can optionally run the standard public-domain
+NES test ROMs from the nesdev community. These are pulled in
+as a git submodule under `testing/test_roms/`.
+
+First-time setup (on a fresh clone):
+
+    git submodule update --init --recursive
+
+This downloads ~27 MB of test ROMs into `testing/test_roms/`.
+If the submodule isn't initialized, the regression tests still
+run normally; only the optional public-domain test ROM
+validation is skipped.
+
+See `testing/test_roms.md` for details on which ROMs are used
+and how to update the pinned version.
+
 ## Todo
 
 Lower priority:

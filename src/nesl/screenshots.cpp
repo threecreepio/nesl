@@ -13,7 +13,6 @@ extern "C" {
     #define mkdir(s) mkdir(s, 0700)
 #endif
 
-#include <unistd.h>
 #include <list>
 
 #define BITMAP_WIDTH 256
@@ -99,6 +98,9 @@ int screenshots_save2(char *path, const uint8_t *src, const uint8_t *lut) {
     }
 
     const char* extname = strrchr(path, '.');
+    if (extname == NULL) {
+        return luaL_error(L, "Screenshot path must have a file extension");
+    }
     if (strcmp(extname, ".bmp") == 0) {
         for (int i = 0; i < 0x20; ++i) {
             short lutclr = i & 0b00000011 ? lut[i] : lut[0];
@@ -230,9 +232,13 @@ int gui_savescreenshotas(lua_State* L) {
         screenshotinitialized = true;
         create_ntsc_palette();
     }
-    screenshotpending = true;
     const char* path = luaL_checkstring(L, 1);
-    strncpy(screenshotpath, path, 0x2000);
+    if (strlen(path) >= sizeof(screenshotpath)) {
+        return luaL_error(L, "Screenshot path is too long");
+    }
+    strncpy(screenshotpath, path, sizeof(screenshotpath) - 1);
+    screenshotpath[sizeof(screenshotpath) - 1] = '\0';
+    screenshotpending = true;
     return 0;
 }
 

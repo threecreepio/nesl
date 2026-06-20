@@ -1,6 +1,8 @@
 #include "nesl.h"
 #include "./lua_bitops.cpp"
+#include "./nesl/signal_handler.h"
 #include <fstream>
+#include <string.h>
 #ifdef WIN32
     #include <direct.h>
 #else
@@ -70,8 +72,9 @@ int loadRomFile(const char* path) {
     int err = stat(path, &st);
     if (err) return err;
 
-    // rom file size must be less than 10MB
-    if (st.st_size > sizeof(romData)) return 1;
+    // rom file size must be less than 10MB; the +1 sentinel below needs one
+    // byte of headroom in romData[].
+    if (st.st_size >= (long)sizeof(romData)) return 1;
     romDataLength = st.st_size;
 
     FILE *f = fopen(path, "rb");
@@ -80,6 +83,26 @@ int loadRomFile(const char* path) {
     fread(romData, 1, st.st_size, f);
     romData[st.st_size] = 0;
     fclose(f);
+
+    // Record the basename of the path for rom.getfilename(). Use a
+    // bounded copy to avoid the 0x2000-byte buffer ever being
+    // overflowed; truncate if the path is longer than the buffer.
+    const char* base = strrchr(path, '/');
+#ifdef WIN32
+    if (base == NULL) base = strrchr(path, '\\');
+#endif
+    if (base != NULL) {
+        base += 1;
+    } else {
+        base = path;
+    }
+    size_t base_len = strlen(base);
+    if (base_len >= sizeof(romFileName)) {
+        base_len = sizeof(romFileName) - 1;
+    }
+    memcpy(romFileName, base, base_len);
+    romFileName[base_len] = '\0';
+
     return 0;
 }
 
@@ -101,6 +124,36 @@ int unimplemented(lua_State* L) {
     return luaL_error(L, "Method not implemented");
 }
 
+// Lua panic handler. When a Lua runtime error bypasses pcall (e.g.
+// out-of-memory during table operations, or an unprotected C call
+// into Lua), Lua invokes this function. Without a panic handler the
+// default behavior is to call abort() with no diagnostic. We print
+// the panic message and a stack frame walk to stderr before
+// aborting, so the failure mode is at least diagnosable.
+//
+// Lua contract: this function must NOT return. If it does, Lua
+// falls back to its own default (which is to call abort()).
+//
+// We walk the Lua stack with lua_getstack/lua_getinfo because the
+// vendored Lua is 5.1, which does not have luaL_traceback (added
+// in 5.2). lua_getstack is safe to call from a panic context.
+static int nesl_lua_panic(lua_State* L) {
+    const char* msg = lua_tostring(L, -1);
+    if (msg == NULL) msg = "<no message>";
+    fprintf(stderr, "\nnesl: Lua panic: %s\n", msg);
+    fprintf(stderr, "nesl: stack frames (innermost first):\n");
+
+    lua_Debug ar;
+    for (int level = 0; lua_getstack(L, level, &ar); ++level) {
+        if (lua_getinfo(L, "Sl", &ar) == 0) break;
+        const char* source = ar.source ? ar.source : "?";
+        fprintf(stderr, "  [%d] %s:%d\n", level, source, ar.currentline);
+    }
+
+    fflush(stderr);
+    abort();
+}
+
 void sigint(int v) {
     screenshots_exit();
 }
@@ -116,6 +169,7 @@ void nesl_terminate(void) {
 
 int main(int argc, char** argv) {
     signal(SIGINT, sigint);
+    nesl_install_signal_handlers();
 
     romData[0] = 0;
     int err;
@@ -135,6 +189,7 @@ int main(int argc, char** argv) {
 
     L = luaL_newstate();
     luaL_openlibs(L);
+    lua_atpanic(L, nesl_lua_panic);
     emulib_register(L);
     memorylib_register(L);
     screenshotlib_register(L);

@@ -4,6 +4,7 @@
 #include "Nes_Mapper.h"
 
 #include <string.h>
+#include <cstdint>
 #include "Nes_Core.h"
 
 /* Copyright (C) 2004-2006 Shay Green. This module is free software; you
@@ -47,6 +48,16 @@ public:
 			mirror = 0;
 			//dprintf( "cart specified vertical mirroring\n" );
 		}
+	}
+
+	virtual void read_state( mapper_state_t const& in )
+	{
+		Nes_Mapper::read_state( in );
+		// irq_latch == 0 with irq_enabled set would cause IRQs to fire on
+		// every clock, hanging emulate_frame. Force a sane non-zero value
+		// on state load.
+		if ( irq_latch == 0 )
+			irq_latch = 1;
 	}
 	
 	void update_chr_banks();
@@ -131,9 +142,12 @@ public:
 void Mapper_Mmc3::run_until( nes_time_t end_time )
 {
 	bool bg_enabled = ppu_enabled();
-	
-	end_time *= ppu_overclock;
-	while ( next_time < end_time && next_time <= last_scanline )
+
+	// Convert the CPU-cycle bound to PPU cycles in int64_t so the multiply
+	// by ppu_overclock doesn't overflow on 32-bit platforms (where
+	// nes_time_t is 32-bit 'long'). On 64-bit this is just a widening.
+	int64_t end_ppu = (int64_t) end_time * ppu_overclock;
+	while ( next_time < end_ppu && next_time <= last_scanline )
 	{
 		if ( bg_enabled )
 			clock_counter();
